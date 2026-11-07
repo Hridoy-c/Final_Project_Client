@@ -257,7 +257,7 @@ export default function Banner() {
       </div>
 
       {/* Stats */}
-      <div className="relative z-10 mx-auto mt-8 max-w-6xl px-4 pb-16 sm:mt-12 sm:px-6 sm:pb-20 lg:pb-24">
+      <div className="relative z-10 mx-auto mt-8 max-w-[90vw] px-4 pb-16 sm:mt-12 sm:px-6 sm:pb-20 lg:pb-24">
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {bannerStats.map((stat) => (
             <article

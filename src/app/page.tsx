@@ -1,11 +1,10 @@
-import React from 'react'
+import Benner from "@/components/home/benner";
 
-const page = () => {
+export default function Home() {
   return (
-    <div>
-        <h1>Welcome to the Page</h1>
-    </div>
-  )
+    <section className="mx-auto flex max-w-3xl flex-col items-center px-6 py-24 text-center sm:py-32">
+      <Benner />
+      
+    </section>
+  );
 }
-
-export default page

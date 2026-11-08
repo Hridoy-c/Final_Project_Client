@@ -3,15 +3,24 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import logo from '@/assets/skillora-logo-light.png'
 import NavLinks from './NavLinks'
 import { authRoutes } from './nav-data'
+import { authClient } from '@/lib/auth-client'
 
 const focusRing =
   'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5b4dff]'
 
 const Navbar = () => {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const { data: session, isPending } = authClient.useSession()
+  const user = session?.user
+  const initial = user?.name?.trim().charAt(0).toUpperCase() || '?'
 
   useEffect(() => {
     if (!open) return
@@ -23,6 +32,22 @@ const Navbar = () => {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    const { error } = await authClient.signOut()
+    setLoggingOut(false)
+
+    if (error) {
+      toast.error(error.message ?? 'Logout failed. Please try again.')
+      return
+    }
+
+    setOpen(false)
+    toast.success('Logged out successfully.')
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <header className="w-full bg-black px-3 py-2 sm:px-6 sm:py-3 2xl:px-8 2xl:py-4 min-[2560px]:px-12 min-[2560px]:py-5">
@@ -46,19 +71,43 @@ const Navbar = () => {
 
           <span className="h-6 w-px bg-gray-600 2xl:h-8" />
 
-          <Link
-            href={authRoutes.signIn}
-            className={`rounded-sm text-[#7c6cf0] hover:opacity-80 ${focusRing}`}
-          >
-            Sign In
-          </Link>
+          {isPending ? (
+            <span className="h-9 w-44 animate-pulse rounded-lg bg-white/5" />
+          ) : user ? (
+            <>
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5b4dff] text-sm font-semibold text-white">
+                  {initial}
+                </span>
+                <span className="max-w-[140px] truncate">{user.name}</span>
+              </div>
 
-          <Link
-            href={authRoutes.signUp}
-            className={`rounded-lg bg-[#5b4dff] px-5 py-2 font-medium text-white hover:bg-[#4a3de0] 2xl:px-7 2xl:py-2.5 min-[2560px]:px-8 min-[2560px]:py-3 ${focusRing}`}
-          >
-            Get Started
-          </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className={`rounded-lg bg-[#5b4dff] px-5 py-2 font-medium text-white hover:bg-[#4a3de0] disabled:cursor-not-allowed disabled:opacity-60 2xl:px-7 2xl:py-2.5 min-[2560px]:px-8 min-[2560px]:py-3 ${focusRing}`}
+              >
+                {loggingOut ? 'Logging out...' : 'Logout'}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href={authRoutes.signIn}
+                className={`rounded-sm text-[#7c6cf0] hover:opacity-80 ${focusRing}`}
+              >
+                Sign In
+              </Link>
+
+              <Link
+                href={authRoutes.signUp}
+                className={`rounded-lg bg-[#5b4dff] px-5 py-2 font-medium text-white hover:bg-[#4a3de0] 2xl:px-7 2xl:py-2.5 min-[2560px]:px-8 min-[2560px]:py-3 ${focusRing}`}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -88,20 +137,44 @@ const Navbar = () => {
 
             <hr className="border-gray-600" />
 
-            <Link
-              href={authRoutes.signIn}
-              onClick={() => setOpen(false)}
-              className="rounded-sm text-[#7c6cf0]"
-            >
-              Sign In
-            </Link>
-            <Link
-              href={authRoutes.signUp}
-              onClick={() => setOpen(false)}
-              className="rounded-xl bg-[#5b4dff] px-6 py-3 text-center font-medium hover:bg-[#4a3de0]"
-            >
-              Get Started
-            </Link>
+            {isPending ? (
+              <span className="h-10 w-full animate-pulse rounded-lg bg-white/5" />
+            ) : user ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5b4dff] text-sm font-semibold text-white">
+                    {initial}
+                  </span>
+                  <span className="truncate">{user.name}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="rounded-xl bg-[#5b4dff] px-6 py-3 text-center font-medium hover:bg-[#4a3de0] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loggingOut ? 'Logging out...' : 'Logout'}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={authRoutes.signIn}
+                  onClick={() => setOpen(false)}
+                  className="rounded-sm text-[#7c6cf0]"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href={authRoutes.signUp}
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl bg-[#5b4dff] px-6 py-3 text-center font-medium hover:bg-[#4a3de0]"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         )}
       </nav>

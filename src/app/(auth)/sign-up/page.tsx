@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { authClient } from '@/lib/auth-client'
+import { useRouter } from 'next/navigation'
 
 /* ---------- Validation ---------- */
 const validateName = (value: string) => {
@@ -98,6 +100,7 @@ const PasswordInput = ({
 
 /* ---------- Page ---------- */
 const SignUpPage = () => {
+  const router = useRouter()
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -112,27 +115,40 @@ const SignUpPage = () => {
     setErrors({ ...errors, [name]: '' })
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
+
+  const newErrors = {
+    name: validateName(form.name),
+    email: validateEmail(form.email),
+    password: validateNewPassword(form.password),
+    confirmPassword: validateConfirm(form.password, form.confirmPassword),
+  }
+  setErrors(newErrors)
+
+  if (Object.values(newErrors).some(Boolean)) return
+
+  const { data: resData, error } = await authClient.signUp.email({
+    name: form.name.trim(),
+    email: form.email.trim(),
+    password: form.password,
+  })
 
 
 
-    const newErrors = {
-      name: validateName(form.name),
-      email: validateEmail(form.email),
-      password: validateNewPassword(form.password),
-      confirmPassword: validateConfirm(form.password, form.confirmPassword),
-    }
-    setErrors(newErrors)
+  if (error) {
+    setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
+    return
+  }
 
-    if (Object.values(newErrors).some(Boolean)) return
-
-    const formData = new FormData( e.currentTarget );
-    const data = Object.fromEntries( formData.entries());
-    console.log('Sign up:', data)
+  if(resData.token){
+    console.log(resData.token)
+    router.push('/')
 
   }
 
+  console.log('Sign up:', resData)
+}
   return (
     <section className="flex w-full items-center justify-center bg-black px-4 py-12 sm:py-16 lg:py-20">
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#161616] p-6 sm:p-8">

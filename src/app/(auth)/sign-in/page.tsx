@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { authClient } from '@/lib/auth-client'
+import { useRouter } from 'next/navigation'
 
 /* ---------- Validation ---------- */
 const validateEmail = (value: string) => {
@@ -78,6 +80,7 @@ const PasswordInput = ({
 
 /* ---------- Page ---------- */
 const SignInPage = () => {
+  const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -87,22 +90,34 @@ const SignInPage = () => {
     setErrors({ ...errors, [name]: '' })
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
 
-    const newErrors = {
-      email: validateEmail(form.email),
-      password: validateRequired(form.password, 'Password'),
-    }
-    setErrors(newErrors)
+  const newErrors = {
+    email: validateEmail(form.email),
+    password: validateRequired(form.password, 'Password'),
+  }
+  setErrors(newErrors)
 
-    if (Object.values(newErrors).some(Boolean)) return
+  if (Object.values(newErrors).some(Boolean)) return
 
-      const formData = new FormData( e.currentTarget );
-    const data = Object.fromEntries(formData.entries());
-    console.log('Sign in:', data)
+
+  const { data: resData, error } = await authClient.signIn.email({
+    email: form.email.trim(),
+    password: form.password,
+  })
+
+  if (error) {
+    setErrors({ password: 'Invalid email or password.' })
+    return
+  }
+
+  if(resData.token){
+    console.log(resData.token)
+    router.push('/')
 
   }
+}
 
   return (
     <section className="flex w-full items-center justify-center bg-black px-4 py-12 sm:py-16 lg:py-20">

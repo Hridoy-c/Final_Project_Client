@@ -5,6 +5,14 @@ import Link from 'next/link'
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 
+/* ---------- Types ---------- */
+type Role = 'seeker' | 'recruiter'
+
+const roles: { value: Role; title: string; description: string }[] = [
+  { value: 'seeker', title: 'Job Seeker', description: 'I am looking for a job' },
+  { value: 'recruiter', title: 'Recruiter', description: 'I want to hire talent' },
+]
+
 /* ---------- Validation ---------- */
 const validateName = (value: string) => {
   const v = value.trim()
@@ -35,6 +43,9 @@ const validateConfirm = (password: string, confirm: string) => {
   if (password !== confirm) return 'Passwords do not match.'
   return ''
 }
+
+const validateRole = (value: string) =>
+  value === 'seeker' || value === 'recruiter' ? '' : 'Please choose an account type.'
 
 /* ---------- Styles ---------- */
 const baseInput =
@@ -106,8 +117,10 @@ const SignUpPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'seeker' as Role,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -115,40 +128,46 @@ const SignUpPage = () => {
     setErrors({ ...errors, [name]: '' })
   }
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault()
-
-  const newErrors = {
-    name: validateName(form.name),
-    email: validateEmail(form.email),
-    password: validateNewPassword(form.password),
-    confirmPassword: validateConfirm(form.password, form.confirmPassword),
-  }
-  setErrors(newErrors)
-
-  if (Object.values(newErrors).some(Boolean)) return
-
-  const { data: resData, error } = await authClient.signUp.email({
-    name: form.name.trim(),
-    email: form.email.trim(),
-    password: form.password,
-  })
-
-
-
-  if (error) {
-    setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
-    return
+  const handleRoleChange = (role: Role) => {
+    setForm({ ...form, role })
+    setErrors({ ...errors, role: '' })
   }
 
-  if(resData.token){
-    console.log(resData.token)
-    router.push('/')
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
 
+    const newErrors = {
+      name: validateName(form.name),
+      email: validateEmail(form.email),
+      password: validateNewPassword(form.password),
+      confirmPassword: validateConfirm(form.password, form.confirmPassword),
+      role: validateRole(form.role),
+    }
+    setErrors(newErrors)
+
+    if (Object.values(newErrors).some(Boolean)) return
+
+    setLoading(true)
+
+    const { data: resData, error } = await authClient.signUp.email({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      role: form.role,
+    })
+
+    setLoading(false)
+
+    if (error) {
+      setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
+      return
+    }
+
+    if (resData?.token) {
+      router.push('/')
+    }
   }
 
-  console.log('Sign up:', resData)
-}
   return (
     <section className="flex w-full items-center justify-center bg-black px-4 py-12 sm:py-16 lg:py-20">
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#161616] p-6 sm:p-8">
@@ -169,6 +188,38 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+          {/* Role */}
+          <fieldset>
+            <legend className="mb-2 block text-sm text-gray-300">I am a</legend>
+            <div className="grid grid-cols-2 gap-3">
+              {roles.map((r) => {
+                const active = form.role === r.value
+                return (
+                  <label
+                    key={r.value}
+                    className={`cursor-pointer rounded-lg border p-3 transition ${
+                      active
+                        ? 'border-[#5b4dff] bg-[#5b4dff]/10'
+                        : 'border-white/10 bg-[#1a1a1a] hover:border-white/20'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value={r.value}
+                      checked={active}
+                      onChange={() => handleRoleChange(r.value)}
+                      className="sr-only"
+                    />
+                    <span className="block text-sm font-medium text-white">{r.title}</span>
+                    <span className="mt-0.5 block text-xs text-gray-400">{r.description}</span>
+                  </label>
+                )
+              })}
+            </div>
+            <FieldError message={errors.role} />
+          </fieldset>
+
           <div>
             <label htmlFor="name" className="mb-2 block text-sm text-gray-300">
               Full name
@@ -241,9 +292,10 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#5b4dff] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#4a3de0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a7dff]"
+            disabled={loading}
+            className="w-full rounded-lg bg-[#5b4dff] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#4a3de0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a7dff] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create account
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 

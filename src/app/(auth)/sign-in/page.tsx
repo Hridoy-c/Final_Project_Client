@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 /* ---------- Validation ---------- */
 const validateEmail = (value: string) => {
@@ -107,16 +108,14 @@ const SignInPage = () => {
     password: form.password,
   })
 
-  if (error) {
-    setErrors({ password: 'Invalid email or password.' })
-    return
-  }
+ if (error) {
+  setErrors({ password: 'Invalid email or password.' })
+  toast.error('Invalid email or password.')
+  return
+}
 
-  if(resData.token){
-    console.log(resData.token)
-    router.push('/')
-
-  }
+toast.success('Signed in successfully!', { description: 'Welcome back.' })
+router.push('/')
 }
 
   return (

@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 /* ---------- Types ---------- */
 type Role = 'seeker' | 'recruiter'
@@ -156,16 +157,18 @@ const SignUpPage = () => {
       role: form.role,
     })
 
-    setLoading(false)
+   setLoading(false)
 
-    if (error) {
-      setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
-      return
-    }
+if (error) {
+  setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
+  toast.error(error.message ?? 'Sign up failed. Please try again.')
+  return
+}
 
-    if (resData?.token) {
-      router.push('/')
-    }
+if (resData?.token) {
+  toast.success('Account created!', { description: 'Welcome to Hireloop.' })
+  router.push('/')
+}
   }
 
   return (

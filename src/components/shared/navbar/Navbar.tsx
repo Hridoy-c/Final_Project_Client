@@ -25,7 +25,7 @@ const Navbar = () => {
   }, [open])
 
   return (
-    <header className="w-full px-3 py-2 sm:px-6 sm:py-3 2xl:px-8 2xl:py-4 min-[2560px]:px-12 min-[2560px]:py-5">
+    <header className="w-full bg-black px-3 py-2 sm:px-6 sm:py-3 2xl:px-8 2xl:py-4 min-[2560px]:px-12 min-[2560px]:py-5">
       <nav className="relative mx-auto flex max-w-[90vw] items-center justify-between rounded-xl bg-[#222] px-4 py-2 sm:px-6 sm:py-2.5 2xl:max-w-[1650px] 2xl:px-9 2xl:py-3.5 min-[2560px]:max-w-[2000px] min-[2560px]:px-11 min-[2560px]:py-4">
         {/* Logo */}
         <Link href="/" aria-label="Skillora home" className={`rounded-md ${focusRing}`}>

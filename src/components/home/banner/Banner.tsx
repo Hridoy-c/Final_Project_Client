@@ -280,7 +280,7 @@ export default function Banner() {
         </div>
       </div>
 
-      {/* Earth Horizon with seamless edge alignment, top shadow & atmospheric blending */}
+      {/* Earth Horizon with seamless edge alignment & atmospheric blending */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-0 overflow-hidden"
@@ -304,9 +304,6 @@ export default function Banner() {
             className="relative h-auto w-full select-none [filter:drop-shadow(0_-12px_28px_rgba(8,8,10,0.95))_drop-shadow(0_-4px_35px_rgba(109,93,252,0.35))]"
           />
 
-          {/* Top-edge ambient shadow & blending layer to melt image transition into space */}
-          <div className="absolute inset-x-0 top-[36%] h-28 bg-gradient-to-b from-[#08080a] via-[#08080a]/50 to-transparent" />
-
           {/* Surface depth gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#08080a]/80 via-[#08080a]/20 to-transparent" />
 
@@ -319,7 +316,7 @@ export default function Banner() {
 
         {/* Viewport edge blending vignettes so left and right transitions are completely imperceptible */}
         <div className="absolute inset-y-0 left-0 w-16 sm:w-28 md:w-40 bg-gradient-to-r from-[#08080a] via-[#08080a]/60 to-transparent" />
-        <div className="absolute inset-y-0 right-0 w-16 sm:w-28 md:w-40 bg-gradient-to-l from-[#08080a] via-[#08080a]/60 to-transparent" />
+        <div className="absolute inset-y-0 right-0 w-16 sm:w-28 md:w-40 bg-gradient-to-l from-[#08080a] via-[#08080a]/40 to-transparent" />
       </div>
     </section>
   );

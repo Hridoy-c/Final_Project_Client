@@ -4,8 +4,9 @@ import { Navbar } from "@/components/shared/navbar";
 import "./globals.css";
 import Footer from "@/components/shared/Footer";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const josefinSans = Josefin_Sans({
   variable: "--font-josefin",
@@ -28,12 +29,32 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", josefinSans.variable, geistMono.variable, "font-sans", geist.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        josefinSans.variable,
+        geistMono.variable,
+        "font-sans",
+        geist.variable
+      )}
     >
       <body className="min-h-full flex flex-col">
         <Navbar />
         <main className="flex-1">{children}</main>
-        <Footer/>  
+        <Footer />
+        <Toaster
+          position="top-center"
+          theme="dark"
+          toastOptions={{
+            classNames: {
+              toast: "bg-[#161616]! text-white! border! border-white/10! rounded-xl!",
+              description: "text-gray-400!",
+              success: "border-[#5b4dff]/60!",
+              error: "border-red-500/60!",
+              icon: "text-[#7c6cf0]!",
+            },
+          }}
+        />
       </body>
     </html>
   );

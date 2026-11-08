@@ -32,10 +32,10 @@ const Navbar = () => {
 
           <span className="h-6 w-px bg-gray-600 2xl:h-8" />
 
-          <Link href="/signin" className="text-[#7c6cf0] hover:opacity-80">Sign In</Link>
+          <Link href="/sign-in" className="text-[#7c6cf0] hover:opacity-80">Sign In</Link>
 
           <Link
-            href="/signup"
+            href="/sign-up"
             className="rounded-lg bg-[#5b4dff] px-5 py-2 font-medium text-white hover:bg-[#4a3de0] 2xl:px-7 2xl:py-2.5 min-[2560px]:px-8 min-[2560px]:py-3"
           >
             Get Started
@@ -63,11 +63,11 @@ const Navbar = () => {
 
             <hr className="border-gray-600" />
 
-            <Link href="/signin" onClick={() => setOpen(false)} className="text-[#7c6cf0]">
+            <Link href="/sign-in" onClick={() => setOpen(false)} className="text-[#7c6cf0]">
               Sign In
             </Link>
             <Link
-              href="/signup"
+              href="/sign-up"
               onClick={() => setOpen(false)}
               className="rounded-xl bg-[#5b4dff] px-6 py-3 text-center font-medium"
             >

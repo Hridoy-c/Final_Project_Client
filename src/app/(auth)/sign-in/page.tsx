@@ -3,31 +3,105 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 
-const inputClass =
-  'w-full rounded-lg border border-white/10 bg-[#1a1a1a] px-4 py-3 text-sm text-white placeholder:text-gray-500 transition focus:border-[#5b4dff] focus:outline-none focus:ring-2 focus:ring-[#5b4dff]/30'
+/* ---------- Validation ---------- */
+const validateEmail = (value: string) => {
+  const v = value.trim()
+  if (!v) return 'Email is required.'
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Enter a valid email address.'
+  return ''
+}
 
+const validateRequired = (value: string, label = 'This field') =>
+  value ? '' : `${label} is required.`
+
+/* ---------- Styles ---------- */
+const baseInput =
+  'w-full rounded-lg border bg-[#1a1a1a] px-4 py-3 text-sm text-white placeholder:text-gray-500 transition focus:outline-none focus:ring-2'
+
+const inputClass = (hasError: boolean) =>
+  `${baseInput} ${
+    hasError
+      ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30'
+      : 'border-white/10 focus:border-[#5b4dff] focus:ring-[#5b4dff]/30'
+  }`
+
+/* ---------- Small components ---------- */
+const FieldError = ({ message }: { message?: string }) =>
+  message ? (
+    <p role="alert" className="mt-1.5 text-xs text-red-400">
+      {message}
+    </p>
+  ) : null
+
+const PasswordInput = ({
+  className = '',
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) => {
+  const [show, setShow] = useState(false)
+
+  return (
+    <div className="relative">
+      <input {...props} type={show ? 'text' : 'password'} className={`${className} pr-12`} />
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        aria-label={show ? 'Hide password' : 'Show password'}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-white"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {show ? (
+            <>
+              <path d="M3 3l18 18" />
+              <path d="M10.6 6.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4.1-.9" />
+              <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+            </>
+          ) : (
+            <>
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+              <circle cx="12" cy="12" r="3" />
+            </>
+          )}
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+/* ---------- Page ---------- */
 const SignInPage = () => {
   const [form, setForm] = useState({ email: '', password: '' })
-  const [show, setShow] = useState(false)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-    setError('')
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+    setErrors({ ...errors, [name]: '' })
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    
-
-    if (!form.email || !form.password) {
-      setError('Please enter your email and password.')
-      return
+    const newErrors = {
+      email: validateEmail(form.email),
+      password: validateRequired(form.password, 'Password'),
     }
+    setErrors(newErrors)
 
-    // TODO: send to your API
-    console.log('Sign in:', form)
+    if (Object.values(newErrors).some(Boolean)) return
+
+      const formData = new FormData( e.currentTarget );
+    const data = Object.fromEntries(formData.entries());
+    console.log('Sign in:', data)
+
   }
 
   return (
@@ -49,7 +123,7 @@ const SignInPage = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
           <div>
             <label htmlFor="email" className="mb-2 block text-sm text-gray-300">
               Email
@@ -58,13 +132,14 @@ const SignInPage = () => {
               id="email"
               name="email"
               type="email"
-              required
               autoComplete="email"
               placeholder="you@example.com"
               value={form.email}
               onChange={handleChange}
-              className={inputClass}
+              aria-invalid={!!errors.email}
+              className={inputClass(!!errors.email)}
             />
+            <FieldError message={errors.email} />
           </div>
 
           <div>
@@ -76,34 +151,18 @@ const SignInPage = () => {
                 Forgot password?
               </Link>
             </div>
-            <input
+            <PasswordInput
               id="password"
               name="password"
-              type={show ? 'text' : 'password'}
-              required
               autoComplete="current-password"
               placeholder="Enter your password"
               value={form.password}
               onChange={handleChange}
-              className={inputClass}
+              aria-invalid={!!errors.password}
+              className={inputClass(!!errors.password)}
             />
+            <FieldError message={errors.password} />
           </div>
-
-          <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-400">
-            <input
-              type="checkbox"
-              checked={show}
-              onChange={() => setShow(!show)}
-              className="h-4 w-4 accent-[#5b4dff]"
-            />
-            Show password
-          </label>
-
-          {error && (
-            <p role="alert" className="rounded-lg bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
-              {error}
-            </p>
-          )}
 
           <button
             type="submit"

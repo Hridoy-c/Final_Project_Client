@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
+      suppressHydrationWarning
       lang="en"
       className={cn(
         "h-full",
@@ -35,7 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         josefinSans.variable,
         geistMono.variable,
         "font-sans",
-        geist.variable
+        geist.variable,
       )}
     >
       <body className="min-h-full flex flex-col">
@@ -47,7 +48,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           theme="dark"
           toastOptions={{
             classNames: {
-              toast: "bg-[#161616]! text-white! border! border-white/10! rounded-xl!",
+              toast:
+                "bg-[#161616]! text-white! border! border-white/10! rounded-xl!",
               description: "text-gray-400!",
               success: "border-[#5b4dff]/60!",
               error: "border-red-500/60!",

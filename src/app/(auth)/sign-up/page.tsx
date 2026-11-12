@@ -7,11 +7,12 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 /* ---------- Types ---------- */
-type Role = 'seeker' | 'recruiter'
+type Role = 'seeker' | 'recruiter' | 'admin'
 
 const roles: { value: Role; title: string; description: string }[] = [
   { value: 'seeker', title: 'Job Seeker', description: 'I am looking for a job' },
   { value: 'recruiter', title: 'Recruiter', description: 'I want to hire talent' },
+  { value: 'admin', title: 'Admin', description: 'I manage the platform' },
 ]
 
 /* ---------- Validation ---------- */
@@ -46,7 +47,9 @@ const validateConfirm = (password: string, confirm: string) => {
 }
 
 const validateRole = (value: string) =>
-  value === 'seeker' || value === 'recruiter' ? '' : 'Please choose an account type.'
+  value === 'seeker' || value === 'recruiter' || value === 'admin'
+    ? ''
+    : 'Please choose an account type.'
 
 /* ---------- Styles ---------- */
 const baseInput =
@@ -157,23 +160,23 @@ const SignUpPage = () => {
       role: form.role,
     })
 
-   setLoading(false)
+    setLoading(false)
 
-if (error) {
-  setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
-  toast.error(error.message ?? 'Sign up failed. Please try again.')
-  return
-}
+    if (error) {
+      setErrors({ email: error.message ?? 'Sign up failed. Please try again.' })
+      toast.error(error.message ?? 'Sign up failed. Please try again.')
+      return
+    }
 
-if (resData?.token) {
-  toast.success('Account created!', { description: 'Welcome to Hireloop.' })
-  router.push('/')
-}
+    if (resData?.token) {
+      toast.success('Account created!', { description: 'Welcome to Hireloop.' })
+      router.push('/')
+    }
   }
 
   return (
     <section className="flex w-full items-center justify-center bg-black px-4 py-12 sm:py-16 lg:py-20">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#161616] p-6 sm:p-8">
+      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#161616] p-6 sm:p-8">
         {/* Heading */}
         <div className="text-center">
           <p className="mb-4 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-widest text-gray-300">
@@ -194,13 +197,13 @@ if (resData?.token) {
           {/* Role */}
           <fieldset>
             <legend className="mb-2 block text-sm text-gray-300">I am a</legend>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {roles.map((r) => {
                 const active = form.role === r.value
                 return (
                   <label
                     key={r.value}
-                    className={`cursor-pointer rounded-lg border p-3 transition ${
+                    className={`flex h-full cursor-pointer flex-col justify-center rounded-lg border p-3 text-center transition focus-within:ring-2 focus-within:ring-[#5b4dff]/40 ${
                       active
                         ? 'border-[#5b4dff] bg-[#5b4dff]/10'
                         : 'border-white/10 bg-[#1a1a1a] hover:border-white/20'

@@ -22,12 +22,12 @@ export const auth = betterAuth({
       },
     },
   },
-  databaseHooks: {
+databaseHooks: {
   user: {
     create: {
       before: async (user) => {
-        // Never trust the client: only seeker/recruiter can be self-selected
-        const role = user.role === 'recruiter' ? 'recruiter' : 'seeker'
+        const allowed = ['seeker', 'recruiter', 'admin']
+        const role = allowed.includes(user.role as string) ? user.role : 'seeker'
         return { data: { ...user, role } }
       },
     },

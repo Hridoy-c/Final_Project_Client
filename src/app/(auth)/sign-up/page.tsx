@@ -53,7 +53,7 @@ const validateRole = (value: string) =>
 
 /* ---------- Styles ---------- */
 const baseInput =
-  'w-full rounded-lg border bg-[#1a1a1a] px-4 py-3 text-sm text-white placeholder:text-gray-500 transition focus:outline-none focus:ring-2'
+  'w-full rounded-lg border bg-[#1a1a1a] px-3.5 py-2.5 text-sm text-white placeholder:text-gray-500 transition focus:outline-none focus:ring-2'
 
 const inputClass = (hasError: boolean) =>
   `${baseInput} ${
@@ -65,7 +65,7 @@ const inputClass = (hasError: boolean) =>
 /* ---------- Small components ---------- */
 const FieldError = ({ message }: { message?: string }) =>
   message ? (
-    <p role="alert" className="mt-1.5 text-xs text-red-400">
+    <p role="alert" className="mt-1 text-xs text-red-400">
       {message}
     </p>
   ) : null
@@ -175,35 +175,32 @@ const SignUpPage = () => {
   }
 
   return (
-    <section className="flex w-full items-center justify-center bg-black px-4 py-12 sm:py-16 lg:py-20">
-      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#161616] p-6 sm:p-8">
+    <section className="flex min-h-screen w-full items-center justify-center bg-black px-4 py-6 sm:py-8">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#161616] p-5 sm:p-6">
         {/* Heading */}
         <div className="text-center">
-          <p className="mb-4 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-widest text-gray-300">
+          <p className="mb-2 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-widest text-gray-300">
             <span className="h-1.5 w-1.5 bg-[#5b4dff]" />
             Sign up
             <span className="h-1.5 w-1.5 bg-[#5b4dff]" />
           </p>
-          <h1 className="text-3xl font-medium leading-tight text-white sm:text-4xl">
+          <h1 className="text-2xl font-medium leading-tight text-white sm:text-3xl">
             Create your account
           </h1>
-          <p className="mt-3 text-sm text-gray-400">
-            Build a profile in three minutes. The matches start arriving tomorrow.
-          </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-3">
           {/* Role */}
           <fieldset>
-            <legend className="mb-2 block text-sm text-gray-300">I am a</legend>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <legend className="mb-1.5 block text-sm text-gray-300">I am a</legend>
+            <div className="grid grid-cols-3 gap-2">
               {roles.map((r) => {
                 const active = form.role === r.value
                 return (
                   <label
                     key={r.value}
-                    className={`flex h-full cursor-pointer flex-col justify-center rounded-lg border p-3 text-center transition focus-within:ring-2 focus-within:ring-[#5b4dff]/40 ${
+                    className={`flex h-full cursor-pointer flex-col justify-center rounded-lg border p-2 text-center transition focus-within:ring-2 focus-within:ring-[#5b4dff]/40 ${
                       active
                         ? 'border-[#5b4dff] bg-[#5b4dff]/10'
                         : 'border-white/10 bg-[#1a1a1a] hover:border-white/20'
@@ -218,7 +215,9 @@ const SignUpPage = () => {
                       className="sr-only"
                     />
                     <span className="block text-sm font-medium text-white">{r.title}</span>
-                    <span className="mt-0.5 block text-xs text-gray-400">{r.description}</span>
+                    <span className="mt-0.5 hidden text-[11px] text-gray-400 sm:block">
+                      {r.description}
+                    </span>
                   </label>
                 )
               })}
@@ -227,7 +226,7 @@ const SignUpPage = () => {
           </fieldset>
 
           <div>
-            <label htmlFor="name" className="mb-2 block text-sm text-gray-300">
+            <label htmlFor="name" className="mb-1.5 block text-sm text-gray-300">
               Full name
             </label>
             <input
@@ -245,7 +244,7 @@ const SignUpPage = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className="mb-2 block text-sm text-gray-300">
+            <label htmlFor="email" className="mb-1.5 block text-sm text-gray-300">
               Email
             </label>
             <input
@@ -263,7 +262,7 @@ const SignUpPage = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-2 block text-sm text-gray-300">
+            <label htmlFor="password" className="mb-1.5 block text-sm text-gray-300">
               Password
             </label>
             <PasswordInput
@@ -280,7 +279,7 @@ const SignUpPage = () => {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="mb-2 block text-sm text-gray-300">
+            <label htmlFor="confirmPassword" className="mb-1.5 block text-sm text-gray-300">
               Confirm password
             </label>
             <PasswordInput
@@ -299,14 +298,14 @@ const SignUpPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-[#5b4dff] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#4a3de0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a7dff] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-lg bg-[#5b4dff] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#4a3de0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a7dff] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
         {/* Footer link */}
-        <p className="mt-6 text-center text-sm text-gray-400">
+        <p className="mt-4 text-center text-sm text-gray-400">
           Already have an account?{' '}
           <Link href="/sign-in" className="text-[#7c6cf0] hover:opacity-80">
             Sign In

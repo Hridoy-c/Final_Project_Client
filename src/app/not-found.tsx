@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function NotFound() {
   return (
-    <section className="relative isolate flex min-h-[70vh] w-full items-center justify-center overflow-hidden bg-black px-4 py-16 sm:py-24">
+    <section className="relative isolate flex min-h-[100vh] w-full items-center justify-center overflow-hidden bg-black px-4 py-16 sm:py-24">
       {/* Purple glow */}
       <div
         aria-hidden

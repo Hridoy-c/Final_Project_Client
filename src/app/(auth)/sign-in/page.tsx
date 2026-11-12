@@ -19,7 +19,7 @@ const validateRequired = (value: string, label = 'This field') =>
 
 /* ---------- Styles ---------- */
 const baseInput =
-  'w-full rounded-lg border bg-[#1a1a1a] px-4 py-3 text-sm text-white placeholder:text-gray-500 transition focus:outline-none focus:ring-2'
+  'w-full rounded-lg border bg-[#1a1a1a] px-3.5 py-2.5 text-sm text-white placeholder:text-gray-500 transition focus:outline-none focus:ring-2'
 
 const inputClass = (hasError: boolean) =>
   `${baseInput} ${
@@ -31,7 +31,7 @@ const inputClass = (hasError: boolean) =>
 /* ---------- Small components ---------- */
 const FieldError = ({ message }: { message?: string }) =>
   message ? (
-    <p role="alert" className="mt-1.5 text-xs text-red-400">
+    <p role="alert" className="mt-1 text-xs text-red-400">
       {message}
     </p>
   ) : null
@@ -84,6 +84,7 @@ const SignInPage = () => {
   const router = useRouter()
   const [form, setForm] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -92,54 +93,56 @@ const SignInPage = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  const newErrors = {
-    email: validateEmail(form.email),
-    password: validateRequired(form.password, 'Password'),
+    const newErrors = {
+      email: validateEmail(form.email),
+      password: validateRequired(form.password, 'Password'),
+    }
+    setErrors(newErrors)
+
+    if (Object.values(newErrors).some(Boolean)) return
+
+    setLoading(true)
+
+    const { error } = await authClient.signIn.email({
+      email: form.email.trim(),
+      password: form.password,
+    })
+
+    setLoading(false)
+
+    if (error) {
+      setErrors({ password: 'Invalid email or password.' })
+      toast.error('Invalid email or password.')
+      return
+    }
+
+    toast.success('Signed in successfully!', { description: 'Welcome back.' })
+    router.push('/')
+    router.refresh()
   }
-  setErrors(newErrors)
-
-  if (Object.values(newErrors).some(Boolean)) return
-
-
-  const { data: resData, error } = await authClient.signIn.email({
-    email: form.email.trim(),
-    password: form.password,
-  })
-
- if (error) {
-  setErrors({ password: 'Invalid email or password.' })
-  toast.error('Invalid email or password.')
-  return
-}
-
-toast.success('Signed in successfully!', { description: 'Welcome back.' })
-router.push('/')
-}
 
   return (
-    <section className="flex w-full items-center justify-center bg-black px-4 py-12 sm:py-16 lg:py-20">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#161616] p-6 sm:p-8">
+    <section className="flex min-h-screen w-full items-center justify-center bg-black px-4 py-6 sm:py-8">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#161616] p-5 sm:p-6">
         {/* Heading */}
         <div className="text-center">
-          <p className="mb-4 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-widest text-gray-300">
+          <p className="mb-2 flex items-center justify-center gap-3 font-mono text-[11px] uppercase tracking-widest text-gray-300">
             <span className="h-1.5 w-1.5 bg-[#5b4dff]" />
             Sign in
             <span className="h-1.5 w-1.5 bg-[#5b4dff]" />
           </p>
-          <h1 className="text-3xl font-medium leading-tight text-white sm:text-4xl">
+          <h1 className="text-2xl font-medium leading-tight text-white sm:text-3xl">
             Welcome back
           </h1>
-          <p className="mt-3 text-sm text-gray-400">
-            Sign in to see your latest matches.
-          </p>
+          <p className="mt-2 text-sm text-gray-400">Sign in to see your latest matches.</p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-3">
           <div>
-            <label htmlFor="email" className="mb-2 block text-sm text-gray-300">
+            <label htmlFor="email" className="mb-1.5 block text-sm text-gray-300">
               Email
             </label>
             <input
@@ -157,7 +160,7 @@ router.push('/')
           </div>
 
           <div>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-1.5 flex items-center justify-between">
               <label htmlFor="password" className="text-sm text-gray-300">
                 Password
               </label>
@@ -180,14 +183,15 @@ router.push('/')
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#5b4dff] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#4a3de0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a7dff]"
+            disabled={loading}
+            className="w-full rounded-lg bg-[#5b4dff] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#4a3de0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8a7dff] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
         {/* Footer link */}
-        <p className="mt-6 text-center text-sm text-gray-400">
+        <p className="mt-4 text-center text-sm text-gray-400">
           Don&apos;t have an account?{' '}
           <Link href="/sign-up" className="text-[#7c6cf0] hover:opacity-80">
             Sign Up

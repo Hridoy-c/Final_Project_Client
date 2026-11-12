@@ -1,8 +1,41 @@
 import Image from "next/image";
 import earth from "@/assets/earth-main.png";
 import starfield from "@/assets/benner-main.png";
-import { bannerStats, trendingPositions } from "./banner-data";
-import type { BannerStatIcon } from "./banner-data";
+
+/* -------------------------------------------------------------------------- */
+/*                                    Data                                    */
+/* -------------------------------------------------------------------------- */
+
+export type BannerStatIcon = "briefcase" | "chart" | "users" | "star";
+
+export type BannerStat = {
+  id: string;
+  label: string;
+  value: string;
+  icon: BannerStatIcon;
+};
+
+export const bannerStats: BannerStat[] = [
+  { id: "active-jobs", label: "Active Jobs", value: "50K", icon: "briefcase" },
+  { id: "companies", label: "Companies", value: "12K", icon: "chart" },
+  { id: "job-seekers", label: "Job Seekers", value: "2M", icon: "users" },
+  {
+    id: "satisfaction-rate",
+    label: "Satisfaction Rate",
+    value: "97%",
+    icon: "star",
+  },
+];
+
+export const trendingPositions = [
+  "Product Designer",
+  "AI Engineering",
+  "Dev-ops Engineer",
+];
+
+/* -------------------------------------------------------------------------- */
+/*                                    Icons                                   */
+/* -------------------------------------------------------------------------- */
 
 type IconProps = {
   className?: string;
@@ -146,6 +179,10 @@ function StatIcon({
       return <StarIcon className={className} />;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                   Banner                                   */
+/* -------------------------------------------------------------------------- */
 
 export default function Banner() {
   return (

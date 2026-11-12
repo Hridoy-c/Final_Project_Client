@@ -5,24 +5,28 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import type { LucideIcon } from 'lucide-react'
 import {
-  BriefcaseBusinessIcon,
-  HomeIcon,
+  BookmarkIcon,
+  BriefcaseIcon,
+  Building2Icon,
+  FileTextIcon,
   LayoutDashboardIcon,
   LogOutIcon,
-  ShieldCheckIcon,
-  UserSearchIcon,
+  SettingsIcon,
+  UsersIcon,
+  WalletIcon,
 } from 'lucide-react'
 
 import logo from '@/assets/skillora-logo-light.png'
 import { authClient } from '@/lib/auth-client'
+import { cn } from '@/lib/utils'
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -31,15 +35,45 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-const mainItems = [
-  { label: 'Overview', href: '/dashboard', icon: LayoutDashboardIcon },
-  { label: 'Job Seeker', href: '/dashboard/seeker', icon: UserSearchIcon },
-  { label: 'Recruiter', href: '/dashboard/recruiter', icon: BriefcaseBusinessIcon },
-  { label: 'Admin', href: '/dashboard/admin', icon: ShieldCheckIcon },
-]
+type Role = 'seeker' | 'recruiter' | 'admin'
+
+type MenuItem = {
+  label: string
+  href: string
+  icon: LucideIcon
+  exact?: boolean
+}
+
+const menuItemsByRole: Record<Role, MenuItem[]> = {
+  seeker: [
+    { label: 'Dashboard', href: '/dashboard/seeker', icon: LayoutDashboardIcon, exact: true },
+    { label: 'Jobs', href: '/dashboard/seeker/jobs', icon: BriefcaseIcon },
+    { label: 'Saved Jobs', href: '/dashboard/seeker/saved-jobs', icon: BookmarkIcon },
+    { label: 'Applications', href: '/dashboard/seeker/applications', icon: FileTextIcon },
+    { label: 'Billing', href: '/dashboard/seeker/billing', icon: WalletIcon },
+    { label: 'Settings', href: '/dashboard/seeker/settings', icon: SettingsIcon },
+  ],
+  recruiter: [
+    { label: 'Dashboard', href: '/dashboard/recruiter', icon: LayoutDashboardIcon, exact: true },
+    { label: 'Manage Jobs', href: '/dashboard/recruiter/jobs', icon: BriefcaseIcon },
+    { label: 'Applications', href: '/dashboard/recruiter/applications', icon: FileTextIcon },
+    { label: 'Settings', href: '/dashboard/recruiter/settings', icon: SettingsIcon },
+  ],
+  admin: [
+    { label: 'Dashboard', href: '/dashboard/admin', icon: LayoutDashboardIcon, exact: true },
+    { label: 'Users', href: '/dashboard/admin/users', icon: UsersIcon },
+    { label: 'Companies', href: '/dashboard/admin/companies', icon: Building2Icon },
+    { label: 'Jobs', href: '/dashboard/admin/jobs', icon: BriefcaseIcon },
+    { label: 'Payments', href: '/dashboard/admin/payments', icon: WalletIcon },
+    { label: 'Settings', href: '/dashboard/admin/settings', icon: SettingsIcon },
+  ],
+}
 
 const itemClass =
-  'h-10 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white data-active:bg-[#5b4dff] data-active:font-medium data-active:text-white data-active:hover:bg-[#4a3de0]'
+  'relative h-10 rounded-lg pl-3 pr-2 text-[#8e8e96] hover:bg-white/[0.04] hover:text-white'
+
+const activeItemClass =
+  'bg-white/[0.06] text-white before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-[#7c6cf0] group-data-[collapsible=icon]:before:hidden'
 
 const DashboardSidebar = () => {
   const pathname = usePathname()
@@ -51,8 +85,13 @@ const DashboardSidebar = () => {
   const user = session?.user
   const initial = user?.name?.trim().charAt(0).toUpperCase() || '?'
 
-  const isActive = (href: string) =>
-    href === '/dashboard' ? pathname === href : pathname.startsWith(href)
+  const role = (user?.role as Role) ?? 'seeker'
+  const items = menuItemsByRole[role] ?? menuItemsByRole.seeker
+
+  const isActive = (item: MenuItem) =>
+    item.exact
+      ? pathname === item.href
+      : pathname === item.href || pathname.startsWith(`${item.href}/`)
 
   const handleLogout = async () => {
     setLoggingOut(true)
@@ -70,99 +109,95 @@ const DashboardSidebar = () => {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-white/10">
-      {/* Logo */}
-      <SidebarHeader className="px-3 py-4">
-        <Link href="/" aria-label="Home" className="px-1 group-data-[collapsible=icon]:hidden">
-          <Image
-            src={logo}
-            alt="Hireloop"
-            width={1116}
-            height={363}
-            unoptimized
-            className="h-8 w-auto"
-          />
-        </Link>
-        <Link
-          href="/"
-          aria-label="Home"
-          className="hidden h-8 w-8 items-center justify-center rounded-lg bg-[#5b4dff] text-sm font-semibold text-white group-data-[collapsible=icon]:flex"
-        >
-          H
-        </Link>
-      </SidebarHeader>
+    <Sidebar collapsible="icon" className="border-white/[0.06]">
+      {/* Wrapper gives the mobile sheet the same dark panel as desktop */}
+      <div className="flex h-full min-h-0 w-full flex-col bg-[#0b0b0e]">
+        {/* Logo */}
+        <SidebarHeader className="gap-0 px-2 py-3">
+          <Link
+            href="/"
+            aria-label="Home"
+            className="px-1 group-data-[collapsible=icon]:hidden"
+          >
+            <Image
+              src={logo}
+              alt="Hireloop"
+              width={1116}
+              height={363}
+              unoptimized
+              className="h-8 w-auto"
+            />
+          </Link>
+          <Link
+            href="/"
+            aria-label="Home"
+            className="mx-auto hidden h-8 w-8 items-center justify-center rounded-lg bg-[#5b4dff] text-sm font-semibold text-white group-data-[collapsible=icon]:flex"
+          >
+            H
+          </Link>
+          <div className="mt-3 h-px bg-white/[0.06] group-data-[collapsible=icon]:hidden" aria-hidden />
+        </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-mono text-[11px] uppercase tracking-widest text-gray-500">
-            Dashboard
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    render={<Link href={item.href} onClick={() => setOpenMobile(false)} />}
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                    className={itemClass}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarContent className="px-2 group-data-[collapsible=icon]:px-0">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1">
+                {items.map((item) => {
+                  const active = isActive(item)
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-mono text-[11px] uppercase tracking-widest text-gray-500">
-            General
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  render={<Link href="/" onClick={() => setOpenMobile(false)} />}
-                  tooltip="Back to home"
-                  className={itemClass}
-                >
-                  <HomeIcon />
-                  <span>Back to home</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        render={
+                          <Link
+                            href={item.href}
+                            onClick={() => setOpenMobile(false)}
+                            aria-current={active ? 'page' : undefined}
+                          />
+                        }
+                        tooltip={item.label}
+                        className={cn(itemClass, active && activeItemClass)}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
 
-      {/* User + logout */}
-      <SidebarFooter className="border-t border-white/10 p-3">
-        <div className="flex items-center gap-2.5 overflow-hidden group-data-[collapsible=icon]:justify-center">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#5b4dff] text-sm font-semibold text-white">
-            {initial}
-          </span>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm text-white">{user?.name ?? 'Guest'}</p>
-            <p className="truncate text-xs text-gray-500">{user?.email}</p>
+        {/* User + logout */}
+        <SidebarFooter className="gap-2 border-t border-white/[0.06] p-2 group-data-[collapsible=icon]:p-1">
+          <div className="flex items-center gap-2.5 overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03] p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#5b4dff] text-sm font-semibold text-white ring-2 ring-[#5b4dff]/25 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8">
+              {initial}
+            </span>
+            <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+              <p className="truncate text-sm text-white">{user?.name ?? 'Guest'}</p>
+              <p className="truncate text-xs capitalize text-[#6b6b73]">
+                {user ? role : 'Not signed in'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleLogout}
-              disabled={loggingOut}
-              tooltip="Logout"
-              className="h-10 rounded-lg text-[#7c6cf0] hover:bg-[#5b4dff]/10 hover:text-[#8a7dff]"
-            >
-              <LogOutIcon />
-              <span>{loggingOut ? 'Logging out...' : 'Logout'}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={handleLogout}
+                disabled={loggingOut}
+                tooltip="Logout"
+                className="h-10 rounded-xl text-[#8a7dff] hover:bg-[#5b4dff]/10 hover:text-[#a99fff]"
+              >
+                <LogOutIcon />
+                <span>{loggingOut ? 'Logging out...' : 'Logout'}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </div>
 
       <SidebarRail />
     </Sidebar>

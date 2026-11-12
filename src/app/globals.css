@@ -123,6 +123,14 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #0f0f0f;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #5b4dff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1f1f1f;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 10%);
+  --sidebar-ring: #5b4dff;
 }
 
 @layer base {

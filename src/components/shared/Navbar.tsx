@@ -8,12 +8,7 @@ import { toast } from 'sonner'
 import logo from '@/assets/skillora-logo-light.png'
 import { authClient } from '@/lib/auth-client'
 
-const navItems = [
-  { label: 'Browse Jobs', href: '/jobs' },
-  { label: 'Company', href: '/company' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Dashboard', href: '/dashboard' },
-]
+
 
 const authRoutes = {
   signIn: '/sign-in',
@@ -28,6 +23,15 @@ const Navbar = () => {
   const { data: session, isPending } = authClient.useSession()
   const user = session?.user
   const initial = user?.name?.trim().charAt(0).toUpperCase() || '?'
+
+  const navItems = [
+  { label: 'Browse Jobs', href: '/jobs' },
+  { label: 'Company', href: '/company' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Dashboard', href: `/dashboard/${user?.role || 'seeker'}` },
+]
+
+
 
   // Close mobile menu with Escape
   useEffect(() => {

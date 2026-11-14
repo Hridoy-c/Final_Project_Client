@@ -13,3 +13,26 @@ export const createJob = async (jobData: TcreatejobForm): Promise<TcreatejobForm
     });
    return res.json();
 }
+
+
+// export const updateJob = async (jobId: string): Promise<TcreatejobForm> => {
+//   const res  = await fetch(`${BASE_URL}/jobs/${jobId}  `, {
+//    method: "PUT",
+//    headers: {
+//      "Content-Type": "application/json",
+//    },
+//    body: JSON.stringify(jobData),
+//  });
+// return res.json();
+// }
+
+
+export const deleteJob = async (jobId: string): Promise<TcreatejobForm> => {
+  const res  = await fetch(`${BASE_URL}/jobs/${jobId}  `, {
+   method: "DELETE",
+   headers: {
+     "Content-Type": "application/json",
+   },
+ });
+return res.json();
+}

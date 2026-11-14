@@ -31,8 +31,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { JobType, TcreatejobForm } from "@/types/jobsTypes";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-const jobTypes: JobType[] = ["Full-time", "Part-time", "Contract", "Internship"];
+const jobTypes: JobType[] = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Internship",
+];
 
 const categories = [
   "Engineering & Tech",
@@ -44,7 +51,13 @@ const categories = [
   "Customer Support",
 ];
 
-const frequencies = ["per hour", "per day", "per week", "per month", "per year"];
+const frequencies = [
+  "per hour",
+  "per day",
+  "per week",
+  "per month",
+  "per year",
+];
 
 const fieldClass =
   "h-11 border-0 bg-[#1a1a1d] text-sm text-white placeholder:text-[#6b6b73] focus-visible:ring-1 focus-visible:ring-[#5b4dff]";
@@ -90,6 +103,8 @@ function toFormData(job: TcreatejobForm): FormData {
 }
 
 const UpdateJobPostForm = ({ job }: { job: TcreatejobForm }) => {
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormData>(toFormData(job));
 
@@ -103,9 +118,34 @@ const UpdateJobPostForm = ({ job }: { job: TcreatejobForm }) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: tomar submit logic ekhane likho
-    // form data: `form`, job id: `job._id`
-    // sesh hole: setOpen(false)
+    if (submitting) return;
+
+    try {
+      setSubmitting(true);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/jobs/${job._id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update job");
+      }
+
+      toast.success("Job updated successfully!");
+      setOpen(false);
+      router.refresh();
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update job",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -225,7 +265,9 @@ const UpdateJobPostForm = ({ job }: { job: TcreatejobForm }) => {
 
           {/* 2. Location, compensation & timeline */}
           <section className={sectionClass}>
-            <SectionTitle>2. Location, Compensation &amp; Timeline</SectionTitle>
+            <SectionTitle>
+              2. Location, Compensation &amp; Timeline
+            </SectionTitle>
 
             <div className="flex items-center justify-between gap-4 rounded-xl bg-[#1a1a1d] p-3">
               <div className="flex min-w-0 items-center gap-3">
@@ -373,9 +415,10 @@ const UpdateJobPostForm = ({ job }: { job: TcreatejobForm }) => {
           <div className="flex justify-start">
             <Button
               type="submit"
+              disabled={submitting}
               className="h-11 gap-2 bg-[#5b4dff] px-6 text-sm text-white shadow-[0_8px_24px_-8px_rgba(91,77,255,0.8)] hover:bg-[#4a3de0]"
             >
-              Update Job
+              {submitting ? "Updating..." : "Update Job"}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

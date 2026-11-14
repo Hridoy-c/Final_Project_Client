@@ -14,22 +14,35 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import type { TcreatejobForm } from "@/types/jobsTypes";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const DeleteJobPostForm = ({ job }: { job: TcreatejobForm }) => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
-      // TODO: tomar delete logic ekhane likho
-      // job id: `job._id`
-      // sesh hole: setOpen(false)
-    } finally {
-      setDeleting(false);
-    }
-  };
+const handleDelete = async () => {
+  setDeleting(true);
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/jobs/${job._id}`,
+      { method: "DELETE" },
+    );
 
+    if (!response.ok) {
+      throw new Error("Failed to delete job");
+    }
+
+    toast.success("Job deleted successfully!");
+    setOpen(false);
+    router.refresh();
+  } catch (error: unknown) {
+    toast.error(error instanceof Error ? error.message : "Failed to delete job");
+  } finally {
+    setDeleting(false);
+  }
+};
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger

@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowRight, Building2, Calendar, Euro, Globe, MapPin } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  Calendar,
+  Euro,
+  Globe,
+  MapPin,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,12 +21,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createJob } from "@/lib/actions/jobs";
+import { JobType, TcreatejobForm } from "@/types/jobsTypes";
+import { toast } from "sonner";
 
 /* -------------------------------------------------------------------------- */
 /*                                Static options                              */
 /* -------------------------------------------------------------------------- */
 
-const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"] as const;
+const jobTypes: JobType[] = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Internship",
+];
 
 const categories = [
   "Engineering & Tech",
@@ -31,32 +46,36 @@ const categories = [
   "Customer Support",
 ];
 
-const frequencies = ["per hour", "per day", "per week", "per month", "per year"];
+const frequencies = [
+  "per hour",
+  "per day",
+  "per week",
+  "per month",
+  "per year",
+];
 
-
-type JobForm = {
-  title: string;
-  company: string;
-  category: string;
-  type: (typeof jobTypes)[number];
-  isRemote: boolean;
-  location: string;
-  deadline: string;
-  minSalary: string;
-  maxSalary: string;
-  frequency: string;
-  responsibilities: string;
-  requirements: string;
+const initialForm: TcreatejobForm = {
+  title: "",
+  company: "",
+  category: "",
+  type: "Full-time",
+  isRemote: false,
+  location: "",
+  deadline: "",
+  minSalary: "",
+  maxSalary: "",
+  frequency: "",
+  responsibilities: "",
+  requirements: "",
 };
-
 
 const fieldClass =
   "h-11 border-0 bg-[#1a1a1d] text-sm text-white placeholder:text-[#6b6b73] focus-visible:ring-1 focus-visible:ring-[#5b4dff]";
 const textareaClass =
   "border-0 bg-[#1a1a1d] text-sm leading-6 text-white placeholder:text-[#6b6b73] focus-visible:ring-1 focus-visible:ring-[#5b4dff]";
 const labelClass = "text-xs font-normal text-[#c4c4cc]";
-const sectionClass =
-  "space-y-5 rounded-2xl bg-[#111113] p-4 sm:p-6";
+const sectionClass = "space-y-5 rounded-2xl bg-[#111113] p-4 sm:p-6";
+const selectContentClass = "border-white/10 bg-[#1a1a1d] text-white";
 
 function Required() {
   return <span className="text-[#5b4dff]"> *</span>;
@@ -85,47 +104,52 @@ function IconInput({
   );
 }
 
-const selectContentClass = "border-white/10 bg-[#1a1a1d] text-white";
-
 /* -------------------------------------------------------------------------- */
 /*                                    Page                                    */
 /* -------------------------------------------------------------------------- */
 
 const AddJobPage = () => {
-  const [form, setForm] = useState<JobForm>({
-    title: "",
-    company: "",
-    category: "",
-    type: "Full-time",
-    isRemote: false,
-    location: "",
-    deadline: "",
-    minSalary: "",
-    maxSalary: "",
-    frequency: "",
-    responsibilities: "",
-    requirements: "",
-  });
+  const [form, setForm] = useState<TcreatejobForm>(initialForm);
+  const [submitting, setSubmitting] = useState(false);
 
-
-  const update = <K extends keyof JobForm>(key: K, value: JobForm[K]) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const update = <K extends keyof TcreatejobForm>(
+    key: K,
+    value: TcreatejobForm[K],
+  ) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: write your submit logic here (form values are in `form`)
+    if (!form.category) {
+      toast.error("Please select a job category.");
+      return;
+    }
 
-    const res  = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    console.log("Job created:", data);
+    if ((form.minSalary || form.maxSalary) && !form.frequency) {
+      toast.error("Please select a salary frequency.");
+      return;
+    }
 
-   
+    if (
+      form.minSalary &&
+      form.maxSalary &&
+      Number(form.minSalary) > Number(form.maxSalary)
+    ) {
+      toast.error("Min salary cannot be greater than max salary.");
+      return;
+    }
+    setSubmitting(true);
+
+    try {
+      const jobData = await createJob(form);
+      console.log("Job created:", jobData);
+      toast.success("Job created successfully!");
+      setForm(initialForm);
+    } catch (error) {
+      console.error("Failed to create job:", error);
+      toast.error("Failed to create job.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -190,7 +214,7 @@ const AddJobPage = () => {
               </Label>
               <Select
                 value={form.category}
-                onValueChange={(v) => update("category", v as JobForm["category"])}
+                onValueChange={(v) => update("category", v as string)}
               >
                 <SelectTrigger id="category" className={`${fieldClass} w-full`}>
                   <SelectValue placeholder="Select category" />
@@ -247,7 +271,10 @@ const AddJobPage = () => {
             <div className="flex min-w-0 items-center gap-3">
               <Globe className="h-5 w-5 shrink-0 text-[#8a7dff]" />
               <div className="min-w-0">
-                <Label htmlFor="isRemote" className="text-xs font-medium text-white">
+                <Label
+                  htmlFor="isRemote"
+                  className="text-xs font-medium text-white"
+                >
                   Remote Work Allowed (isRemote)
                 </Label>
                 <p className="text-[11px] text-[#8e8e96]">
@@ -268,7 +295,9 @@ const AddJobPage = () => {
                 <Label htmlFor="location" className={labelClass}>
                   Job Location (location)
                 </Label>
-                <span className="text-[10px] text-[#6b6b73]">Required</span>
+                <span className="text-[10px] text-[#6b6b73]">
+                  {form.isRemote ? "Optional" : "Required"}
+                </span>
               </div>
               <IconInput
                 id="location"
@@ -335,9 +364,12 @@ const AddJobPage = () => {
               </Label>
               <Select
                 value={form.frequency}
-                onValueChange={(v) => update("frequency", v as JobForm["frequency"])}
+                onValueChange={(v) => update("frequency", v as string)}
               >
-                <SelectTrigger id="frequency" className={`${fieldClass} w-full`}>
+                <SelectTrigger
+                  id="frequency"
+                  className={`${fieldClass} w-full`}
+                >
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent className={selectContentClass}>
@@ -389,13 +421,14 @@ const AddJobPage = () => {
           </div>
         </section>
 
-        {/* Publish button: bottom right, wider */}
+        {/* Publish button */}
         <div className="flex justify-end">
           <Button
             type="submit"
+            disabled={submitting}
             className="h-12 w-full gap-2 bg-[#5b4dff] px-10 text-base text-white shadow-[0_8px_24px_-8px_rgba(91,77,255,0.8)] hover:bg-[#4a3de0] sm:w-72"
           >
-            Publish Job
+            {submitting ? "Publishing..." : "Publish Job"}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>

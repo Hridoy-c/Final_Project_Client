@@ -57,7 +57,7 @@ const menuItemsByRole: Record<Role, MenuItem[]> = {
   recruiter: [
     { label: 'Dashboard', href: '/dashboard/recruiter', icon: LayoutDashboardIcon, exact: true },
     { label: 'Add Job', href: '/dashboard/recruiter/add-job', icon: BadgePlusIcon },
-    { label: 'Manage Jobs', href: '/dashboard/recruiter/jobs', icon: BriefcaseIcon },
+    { label: 'Manage Jobs', href: '/dashboard/recruiter/manage-jobs', icon: BriefcaseIcon },
     { label: 'Applications', href: '/dashboard/recruiter/applications', icon: FileTextIcon },
     { label: 'Settings', href: '/dashboard/recruiter/settings', icon: SettingsIcon },
   ],

@@ -2,10 +2,6 @@
 
 import React from "react";
 
-/* -------------------------------------------------------------------------- */
-/*                                 Dummy data                                 */
-/* -------------------------------------------------------------------------- */
-
 type StatIconName = "file" | "users" | "bolt" | "check";
 
 type Stat = {
@@ -82,10 +78,6 @@ const statusStyles: Record<Status, string> = {
   Rejected: "border-red-500/40 bg-red-500/10 text-red-400",
 };
 
-/* -------------------------------------------------------------------------- */
-/*                                 Small parts                                */
-/* -------------------------------------------------------------------------- */
-
 function StatIcon({ name }: { name: StatIconName }) {
   const common = {
     viewBox: "0 0 24 24",
@@ -156,13 +148,9 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                    Page                                    */
-/* -------------------------------------------------------------------------- */
-
 const RecruiterPage = () => {
   return (
-    <main className="min-h-screen bg-[#0a0a0c] px-4 py-8 text-white sm:px-6 lg:px-8">
+    <div className="w-full text-white">
       <div className="mx-auto max-w-6xl">
         {/* Welcome */}
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
@@ -205,8 +193,8 @@ const RecruiterPage = () => {
           </div>
 
           {/* Desktop / tablet table */}
-          <div className="mt-4 hidden overflow-hidden rounded-xl border border-white/[0.07] bg-[#111114] md:block">
-            <table className="w-full text-left text-sm">
+          <div className="mt-4 hidden overflow-x-auto rounded-xl border border-white/[0.07] bg-[#111114] md:block">
+            <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="bg-white/[0.04] text-[11px] uppercase tracking-wider text-[#8e8e96]">
                 <tr>
                   <th className="px-5 py-3 font-medium">Candidate name</th>
@@ -291,7 +279,7 @@ const RecruiterPage = () => {
           <path d="M12 5v14M5 12h14" />
         </svg>
       </button>
-    </main>
+    </div>
   );
 };
 

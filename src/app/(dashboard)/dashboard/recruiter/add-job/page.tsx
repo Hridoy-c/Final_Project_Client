@@ -25,10 +25,6 @@ import { createJob } from "@/lib/actions/jobs";
 import { JobType, TcreatejobForm } from "@/types/jobsTypes";
 import { toast } from "sonner";
 
-/* -------------------------------------------------------------------------- */
-/*                                Static options                              */
-/* -------------------------------------------------------------------------- */
-
 const jobTypes: JobType[] = [
   "Full-time",
   "Part-time",
@@ -55,6 +51,7 @@ const frequencies = [
 ];
 
 const initialForm: TcreatejobForm = {
+  
   title: "",
   company: "",
   category: "",
@@ -104,10 +101,6 @@ function IconInput({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                    Page                                    */
-/* -------------------------------------------------------------------------- */
-
 const AddJobPage = () => {
   const [form, setForm] = useState<TcreatejobForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -153,7 +146,7 @@ const AddJobPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0c] px-4 py-8 text-white sm:px-6 lg:px-8">
+    <div className="w-full text-white">
       <form onSubmit={handleSubmit} className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -433,7 +426,7 @@ const AddJobPage = () => {
           </Button>
         </div>
       </form>
-    </main>
+    </div>
   );
 };
 

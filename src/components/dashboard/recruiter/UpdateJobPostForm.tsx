@@ -33,6 +33,7 @@ import {
 import type { JobType, TcreatejobForm } from "@/types/jobsTypes";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { updateJob } from "@/lib/actions/jobs";
 
 const jobTypes: JobType[] = [
   "Full-time",
@@ -123,18 +124,7 @@ const UpdateJobPostForm = ({ job }: { job: TcreatejobForm }) => {
     try {
       setSubmitting(true);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/jobs/${job._id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update job");
-      }
+      await updateJob(job._id, form);
 
       toast.success("Job updated successfully!");
       setOpen(false);

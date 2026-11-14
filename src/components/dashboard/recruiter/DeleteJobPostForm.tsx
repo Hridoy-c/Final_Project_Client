@@ -16,29 +16,28 @@ import { Button } from "@/components/ui/button";
 import type { TcreatejobForm } from "@/types/jobsTypes";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { deleteJob } from "@/lib/actions/jobs";
 
 const DeleteJobPostForm = ({ job }: { job: TcreatejobForm }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+
 const handleDelete = async () => {
+  if (!job._id) return;
+
   setDeleting(true);
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/jobs/${job._id}`,
-      { method: "DELETE" },
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to delete job");
-    }
+    await deleteJob(job._id);
 
     toast.success("Job deleted successfully!");
     setOpen(false);
     router.refresh();
   } catch (error: unknown) {
-    toast.error(error instanceof Error ? error.message : "Failed to delete job");
+    toast.error(
+      error instanceof Error ? error.message : "Failed to delete job",
+    );
   } finally {
     setDeleting(false);
   }

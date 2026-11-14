@@ -13,6 +13,9 @@ import type { TcreatejobForm } from "@/types/jobsTypes";
 import UpdateJobPostForm from "@/components/dashboard/recruiter/UpdateJobPostForm";
 import DeleteJobPostForm from "@/components/dashboard/recruiter/DeleteJobPostForm";
 import JobMoreActions from "@/components/dashboard/recruiter/JobMoreActions";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 const frequencyShort: Record<string, string> = {
   "per hour": "hr",
@@ -114,7 +117,17 @@ function Actions({ job }: { job: TcreatejobForm }) {
 }
 
 export default async function ManageJobsPage() {
-  const jobs = await getJobs();
+ const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/sign-in");
+  }
+
+  const jobs = await getJobs(session.user.id) ;
+  
+
 
   return (
     <div className="w-full text-white">

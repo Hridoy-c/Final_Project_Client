@@ -1,5 +1,5 @@
  export type JobType = "Full-time" | "Part-time" | "Contract" | "Internship" | "Freelance";
- export type TcreatejobForm = {
+export type TcreatejobForm = {
   _id?: string;
   title: string;
   company: string;
@@ -13,4 +13,8 @@
   frequency: string;
   responsibilities: string;
   requirements: string;
+  recruiterId?: string;
+  recruiterName?: string;
+  recruiterEmail?: string;
+  jobPostDate?: string;
 };

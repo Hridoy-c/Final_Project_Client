@@ -25,6 +25,7 @@ import { createJob } from "@/lib/actions/jobs";
 import { JobType, TcreatejobForm } from "@/types/jobsTypes";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const jobTypes: JobType[] = [
   "Full-time",
@@ -112,48 +113,65 @@ const AddJobPage = () => {
     value: TcreatejobForm[K],
   ) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!form.category) {
-      toast.error("Please select a job category.");
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  if (submitting) return;
 
-    if ((form.minSalary || form.maxSalary) && !form.frequency) {
-      toast.error("Please select a salary frequency.");
-      return;
-    }
+  if (!form.category) {
+    toast.error("Please select a job category.");
+    return;
+  }
 
-    if (
-      form.minSalary &&
-      form.maxSalary &&
-      Number(form.minSalary) > Number(form.maxSalary)
-    ) {
-      toast.error("Min salary cannot be greater than max salary.");
-      return;
-    }
+  if ((form.minSalary || form.maxSalary) && !form.frequency) {
+    toast.error("Please select a salary frequency.");
+    return;
+  }
+
+  if (
+    form.minSalary &&
+    form.maxSalary &&
+    Number(form.minSalary) > Number(form.maxSalary)
+  ) {
+    toast.error("Min salary cannot be greater than max salary.");
+    return;
+  }
+
+  try {
     setSubmitting(true);
 
-    try {
-      setSubmitting(true);
+    const { data: session } = await authClient.getSession();
 
-      const jobData = await createJob(form);
-
-      toast.success("Job created successfully!");
-      setForm(initialForm);
-      router.push("/dashboard/recruiter/manage-jobs");
-    } catch (error: unknown) {
-      console.error("Failed to create job:", error);
-
-      const message =
-        error instanceof Error ? error.message : "Failed to create job.";
-
-      toast.error(message);
-    } finally {
-      setSubmitting(false);
+    if (!session) {
+      toast.error("You must be logged in to create a job.");
+      return; // finally still runs, so submitting is reset
     }
-  };
 
+    const { user } = session;
+
+    const jobPostFormData: TcreatejobForm = {
+      ...form,
+      recruiterId: user.id , 
+      recruiterName: user.name,
+      recruiterEmail: user.email,
+      jobPostDate: new Date().toISOString(),
+    };
+
+    await createJob(jobPostFormData);
+
+    toast.success("Job created successfully!");
+    setForm(initialForm);
+    router.push("/dashboard/recruiter/manage-jobs");
+  } catch (error: unknown) {
+    console.error("Failed to create job:", error);
+
+    const message =
+      error instanceof Error ? error.message : "Failed to create job.";
+
+    toast.error(message);
+  } finally {
+    setSubmitting(false);
+  }
+};
   return (
     <div className="w-full text-white">
       <form onSubmit={handleSubmit} className="mx-auto max-w-4xl space-y-6">

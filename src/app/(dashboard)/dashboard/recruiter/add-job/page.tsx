@@ -24,6 +24,7 @@ import {
 import { createJob } from "@/lib/actions/jobs";
 import { JobType, TcreatejobForm } from "@/types/jobsTypes";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const jobTypes: JobType[] = [
   "Full-time",
@@ -102,6 +103,7 @@ function IconInput({
 }
 
 const AddJobPage = () => {
+  const router = useRouter();
   const [form, setForm] = useState<TcreatejobForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
 
@@ -133,13 +135,20 @@ const AddJobPage = () => {
     setSubmitting(true);
 
     try {
+      setSubmitting(true);
+
       const jobData = await createJob(form);
-      console.log("Job created:", jobData);
+
       toast.success("Job created successfully!");
       setForm(initialForm);
-    } catch (error) {
+      router.push("/dashboard/recruiter/manage-jobs");
+    } catch (error: unknown) {
       console.error("Failed to create job:", error);
-      toast.error("Failed to create job.");
+
+      const message =
+        error instanceof Error ? error.message : "Failed to create job.";
+
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }

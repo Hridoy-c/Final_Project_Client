@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import { getJobs } from "@/lib/api/job";
 import type { TcreatejobForm } from "@/types/jobsTypes";
+import UpdateJobPostForm from "@/components/dashboard/recruiter/UpdateJobPostForm";
+import DeleteJobPostForm from "@/components/dashboard/recruiter/DeleteJobPostForm";
+import JobMoreActions from "@/components/dashboard/recruiter/JobMoreActions";
 
 const frequencyShort: Record<string, string> = {
   "per hour": "hr",
@@ -100,30 +103,12 @@ function Location({ job }: { job: TcreatejobForm }) {
   );
 }
 
-function Actions() {
+function Actions({ job }: { job: TcreatejobForm }) {
   return (
     <div className="flex items-center justify-end gap-1.5">
-      <button
-        type="button"
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#1d1b2e] px-3 text-xs font-medium text-[#a99fff] transition-colors hover:bg-[#5b4dff]/25"
-      >
-        <Pencil className="h-3.5 w-3.5" />
-        Update
-      </button>
-      <button
-        type="button"
-        aria-label="Delete job"
-        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1d] text-[#8e8e96] transition-colors hover:bg-red-500/10 hover:text-red-400"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
-        aria-label="More actions"
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8e8e96] transition-colors hover:bg-white/[0.06] hover:text-white"
-      >
-        <MoreVertical className="h-4 w-4" />
-      </button>
+      <UpdateJobPostForm job={job} />
+      <DeleteJobPostForm job={job}   />
+      <JobMoreActions job={job} />
     </div>
   );
 }
@@ -172,8 +157,12 @@ export default async function ManageJobsPage() {
             <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="bg-white/[0.04] text-[11px] uppercase tracking-wider text-[#8e8e96]">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Job title &amp; dept</th>
-                  <th className="px-4 py-3 font-medium">Company &amp; location</th>
+                  <th className="px-4 py-3 font-medium">
+                    Job title &amp; dept
+                  </th>
+                  <th className="px-4 py-3 font-medium">
+                    Company &amp; location
+                  </th>
                   <th className="px-4 py-3 font-medium">Type</th>
                   <th className="px-4 py-3 font-medium">Compensation</th>
                   <th className="px-4 py-3 font-medium">Status</th>
@@ -224,7 +213,7 @@ export default async function ManageJobsPage() {
                         </p>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
-                        <Actions />
+                        <Actions job={job} />
                       </td>
                     </tr>
                   );
@@ -274,7 +263,7 @@ export default async function ManageJobsPage() {
                       <Calendar className="h-3.5 w-3.5" />
                       {formatDate(job.deadline)}
                     </span>
-                    <Actions />
+                    <Actions job={job} />
                   </div>
                 </li>
               );

@@ -11,7 +11,6 @@ export const getJobs = async (
   if (recruiterId) params.set("recruiterId", recruiterId);
 
   const url = `${BASE_URL}/jobs?${params.toString()}`;
-  console.log("Fetching:", url);
 
   const res = await fetch(url, { cache: "no-store" });
 

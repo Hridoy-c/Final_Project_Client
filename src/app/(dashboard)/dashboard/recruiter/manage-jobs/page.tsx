@@ -1,14 +1,7 @@
 import Link from "next/link";
-import {
-  Calendar,
-  Globe,
-  MapPin,
-  MoreVertical,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { Calendar, Globe, MapPin, Plus } from "lucide-react";
 import type { TcreatejobForm } from "@/types/jobsTypes";
+import { getJobs } from "@/lib/api/job";
 import UpdateJobPostForm from "@/components/dashboard/recruiter/UpdateJobPostForm";
 import DeleteJobPostForm from "@/components/dashboard/recruiter/DeleteJobPostForm";
 import JobMoreActions from "@/components/dashboard/recruiter/JobMoreActions";

@@ -8,19 +8,29 @@ import {
   ChevronRight,
   Search,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* -------------------------------------------------------------------------- */
 /*                                 Search bar                                 */
 /* -------------------------------------------------------------------------- */
 
 export function JobSearchBar() {
+    const router = useRouter();
   const handleSearchChange = (value: string) => {
     // TODO: keep the keyword (title / company / keywords) in state
   };
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: push `?search=...` to the URL
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    const search = data.search as string;
+
+    const params = new URLSearchParams()
+    params.set("search", search)
+
+    router.push(`/browse-jobs?${params.toString()}`)
   };
 
   return (
@@ -195,4 +205,4 @@ export function JobsPagination({
       </button>
     </nav>
   );
-}
+} 

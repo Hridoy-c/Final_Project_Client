@@ -17,7 +17,7 @@ export const createJob = async (
 };
 
 export const updateJob = async (jobId: string |  undefined , jobData: TcreatejobForm): Promise<TcreatejobForm> => {
-  const res  = await fetch(`${BASE_URL}/jobs/${jobId}  `, {
+  const res = await fetch(`${BASE_URL}/jobs/${jobId}`, {
    method: "PATCH",
    headers: {
      "Content-Type": "application/json",

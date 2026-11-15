@@ -74,11 +74,10 @@ src/types             shared types
 
 ## Known issues (don't "fix" blindly)
 
-- `updateJob` in `src/lib/actions/jobs.ts` builds a URL with trailing spaces: `/jobs/${jobId}  `.
-- `getJobs` in `src/lib/api/job.ts` has a leftover `console.log(res)`.
-- No `middleware.ts` — dashboards are not protected by session or role.
+- No `middleware.ts` — dashboards are not protected by session or role (only `manage-jobs` and `/dashboard` check the session server-side).
 - Sidebar links for seeker/admin subpages (`/dashboard/seeker/jobs`, `/dashboard/admin/users`, etc.) do not exist yet.
 - `add-job` imports a `Euro` icon although salaries use a generic `frequency` string.
+- `BrowseControls.tsx` / `BrowseFilters.tsx` have placeholder props/handlers that lint flags as unused (warnings only).
 
 ## Rules for agents
 

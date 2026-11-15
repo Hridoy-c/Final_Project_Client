@@ -8,7 +8,6 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { getJobs } from "@/lib/api/job";
 import type { TcreatejobForm } from "@/types/jobsTypes";
 import UpdateJobPostForm from "@/components/dashboard/recruiter/UpdateJobPostForm";
 import DeleteJobPostForm from "@/components/dashboard/recruiter/DeleteJobPostForm";
@@ -121,12 +120,15 @@ export default async function ManageJobsPage() {
     headers: await headers(),
   });
 
+
+
   if (!session) {
     redirect("/sign-in");
   }
 
-  const jobs = await getJobs(session.user.id) ;
-  
+   const recruiterId = session?.user?.id;
+
+  const jobs = recruiterId ? await getJobs("", recruiterId) : [];
 
 
   return (

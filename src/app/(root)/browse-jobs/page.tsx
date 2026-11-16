@@ -8,12 +8,8 @@ import {
   SaveJobButton,
   SortSelect,
 } from "@/components/browse-jobs/BrowseControls";
-import { getJobs } from "@/lib/api/job";
+import { getJobsPage } from "@/lib/api/job";
 import type { TcreatejobForm } from "@/types/jobsTypes";
-
-/* -------------------------------------------------------------------------- */
-/*                                 Small parts                                */
-/* -------------------------------------------------------------------------- */
 
 const frequencyShort: Record<string, string> = {
   "per hour": "hr",
@@ -60,10 +56,6 @@ function CompanyLogo({ name }: { name: string }) {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                    Page                                    */
-/* -------------------------------------------------------------------------- */
-
 const BrowsePage = async ({
   searchParams,
 }: {
@@ -81,24 +73,21 @@ const BrowsePage = async ({
   );
   const query = urlSearch.toString();
 
-  const jobs = await getJobs(query);
+  const { jobs, total, page, totalPages } = await getJobsPage(query);
 
   return (
     <main className="min-h-screen bg-[#0a0a0c] px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-6">
-        {/* Search bar */}
         <JobSearchBar />
 
         <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-          {/* Filters */}
           <BrowseFilters />
 
-          {/* Results */}
           <section className="min-w-0">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="text-lg font-semibold sm:text-xl">
-                {jobs.length > 0
-                  ? `Found ${jobs.length} Job${jobs.length === 1 ? "" : "s"}`
+                {total > 0
+                  ? `Found ${total} Job${total === 1 ? "" : "s"}`
                   : "No Jobs Found"}
               </h1>
               <SortSelect />
@@ -106,14 +95,13 @@ const BrowsePage = async ({
 
             {jobs.length === 0 ? (
               <div className="mt-5 rounded-2xl border border-dashed border-white/10 bg-[#111114] px-6 py-16 text-center">
-                <p className="text-sm font-medium">No job posts yet</p>
+                <p className="text-sm font-medium">No jobs found</p>
                 <p className="mt-1 text-xs text-[#8e8e96]">
                   Check back soon or adjust your filters.
                 </p>
               </div>
             ) : (
               <>
-                {/* Job cards */}
                 <ul className="mt-5 space-y-4">
                   {jobs.map((job, index) => (
                     <li
@@ -166,8 +154,7 @@ const BrowsePage = async ({
                   ))}
                 </ul>
 
-                {/* Pagination */}
-                <JobsPagination currentPage={1} totalPages={1} />
+                <JobsPagination currentPage={page} totalPages={totalPages} />
               </>
             )}
           </section>

@@ -18,3 +18,11 @@ export type TcreatejobForm = {
   recruiterEmail?: string;
   jobPostDate?: string;
 };
+
+
+export type JobsResponse = {
+  jobs: TcreatejobForm[];
+  total: number;
+  page: number;
+  totalPages: number;
+};

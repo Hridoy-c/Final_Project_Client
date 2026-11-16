@@ -8,29 +8,24 @@ import {
   ChevronRight,
   Search,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-/* -------------------------------------------------------------------------- */
-/*                                 Search bar                                 */
-/* -------------------------------------------------------------------------- */
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export function JobSearchBar() {
-    const router = useRouter();
-  const handleSearchChange = (value: string) => {
-    // TODO: keep the keyword (title / company / keywords) in state
-  };
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const search = String(formData.get("search") ?? "").trim();
 
-    const search = data.search as string;
+    const params = new URLSearchParams(searchParams.toString());
+    if (search) params.set("search", search);
+    else params.delete("search");
+    params.delete("page");
 
-    const params = new URLSearchParams()
-    params.set("search", search)
-
-    router.push(`/browse-jobs?${params.toString()}`)
+    const qs = params.toString();
+    router.push(qs ? `/browse-jobs?${qs}` : "/browse-jobs");
   };
 
   return (
@@ -44,9 +39,9 @@ export function JobSearchBar() {
         <input
           type="search"
           name="search"
+          defaultValue={searchParams.get("search") ?? ""}
           placeholder="Search by job title, company, keywords..."
           aria-label="Search by job title, company or keywords"
-          onChange={(e) => handleSearchChange(e.target.value)}
           className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-[#6b6b73] focus:outline-none"
         />
       </div>
@@ -60,20 +55,28 @@ export function JobSearchBar() {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Sort select                               */
-/* -------------------------------------------------------------------------- */
-
 const sortOptions = [
-  "Most Recent",
-  "Highest Salary",
-  "Lowest Salary",
-  "Deadline Soon",
+  { label: "Most Recent", value: "recent" },
+  { label: "Highest Salary", value: "salary-high" },
+  { label: "Lowest Salary", value: "salary-low" },
+  { label: "Deadline Soon", value: "deadline" },
 ];
 
 export function SortSelect() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentSort = searchParams.get("sort") ?? "recent";
+
   const handleSortChange = (value: string) => {
-    // TODO: push `?sort=...` to the URL
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === "recent") params.delete("sort");
+    else params.set("sort", value);
+    params.delete("page");
+
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
   return (
@@ -82,13 +85,13 @@ export function SortSelect() {
       <div className="relative">
         <select
           id="sort"
-          defaultValue="Most Recent"
+          value={currentSort}
           onChange={(e) => handleSortChange(e.target.value)}
           className="h-9 appearance-none rounded-lg border border-white/[0.07] bg-[#18181b] py-0 pl-3 pr-8 text-xs text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-[#5b4dff]"
         >
           {sortOptions.map((option) => (
-            <option key={option} value={option}>
-              {option}
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -98,13 +101,9 @@ export function SortSelect() {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Save job                                  */
-/* -------------------------------------------------------------------------- */
-
 export function SaveJobButton({ jobId }: { jobId: string | number }) {
   const handleSave = () => {
-    // TODO: save / unsave job (jobId)
+    console.log("save job", jobId);
   };
 
   return (
@@ -119,10 +118,6 @@ export function SaveJobButton({ jobId }: { jobId: string | number }) {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                 Pagination                                 */
-/* -------------------------------------------------------------------------- */
-
 const pageBtn =
   "flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs transition-colors";
 
@@ -133,19 +128,23 @@ export function JobsPagination({
   currentPage?: number;
   totalPages?: number;
 }) {
-  const handlePrevious = () => {
-    // TODO: go to currentPage - 1
-  };
-
-  const handleNext = () => {
-    // TODO: go to currentPage + 1
-  };
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const handlePageChange = (page: number) => {
-    // TODO: go to `page`
+    if (page < 1 || page > totalPages) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (page === 1) params.delete("page");
+    else params.set("page", String(page));
+
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
   };
 
-  // Simple window: 1 2 3 ... last
+  const handlePrevious = () => handlePageChange(currentPage - 1);
+  const handleNext = () => handlePageChange(currentPage + 1);
+
   const pages = [1, 2, 3].filter((p) => p < totalPages);
 
   return (
@@ -179,7 +178,9 @@ export function JobsPagination({
         </button>
       ))}
 
-      {totalPages > 4 && <span className="px-1 text-xs text-[#6b6b73]">...</span>}
+      {totalPages > 4 && (
+        <span className="px-1 text-xs text-[#6b6b73]">...</span>
+      )}
 
       <button
         type="button"
@@ -205,4 +206,4 @@ export function JobsPagination({
       </button>
     </nav>
   );
-} 
+}

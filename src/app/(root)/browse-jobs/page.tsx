@@ -10,6 +10,7 @@ import {
 } from "@/components/browse-jobs/BrowseControls";
 import { getJobsPage } from "@/lib/api/job";
 import type { TcreatejobForm } from "@/types/jobsTypes";
+import Link from "next/link";
 
 const frequencyShort: Record<string, string> = {
   "per hour": "hr",
@@ -104,7 +105,9 @@ const BrowsePage = async ({
               <>
                 <ul className="mt-5 space-y-4">
                   {jobs.map((job, index) => (
-                    <li
+                    
+                   <Link href={`/browse-jobs/${job._id}`} key={job._id ?? `${job.title}-${index}`}>
+                    <li 
                       key={job._id ?? `${job.title}-${index}`}
                       className="rounded-2xl border border-white/[0.07] bg-[#111114] p-4 transition-colors hover:border-white/15 sm:p-5"
                     >
@@ -151,6 +154,7 @@ const BrowsePage = async ({
                         <SaveJobButton jobId={job._id ?? ""} />
                       </div>
                     </li>
+                    </Link>
                   ))}
                 </ul>
 

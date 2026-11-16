@@ -32,3 +32,13 @@ export const getJobsPage = async (query = ""): Promise<JobsResponse> => {
 
   return res.json();
 };
+
+export const getJobsById = async (id: string): Promise<TcreatejobForm> => {
+  const res = await fetch(`${BASE_URL}/jobs/${id}`, { cache: "no-store" });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch jobs: ${res.status}`);
+  }
+
+  return res.json();
+};

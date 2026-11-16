@@ -60,7 +60,7 @@ const Navbar = () => {
   }
 
   return (
-    <header className="w-full bg-black px-3 py-2 sm:px-6 sm:py-3 2xl:px-8 2xl:py-4">
+    <header className="w-full  px-3 py-2 sm:px-6 sm:py-3 2xl:px-8 2xl:py-4">
       <nav className="relative mx-auto flex max-w-[90vw] items-center justify-between rounded-xl bg-[#222] px-4 py-2 sm:px-6 sm:py-2.5 2xl:max-w-[1650px] 2xl:px-9 2xl:py-3.5">
         {/* Logo */}
         <Link href="/" aria-label="Home">

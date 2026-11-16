@@ -1,26 +1,36 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { CheckCircle2, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-type ApplyJobModalProps = {
-  jobId: string;
-  jobTitle: string;
-  company: string;
-  disabled?: boolean;
-};
+import { authClient } from "@/lib/auth-client";
+import { createApplication } from "@/lib/actions/applications";
+import { ApplyJobModalProps, TApplication } from "@/types/applicationsType";
+
+
 
 const inputCls =
   "h-10 w-full rounded-lg border border-white/[0.07] bg-[#18181b] px-3 text-sm text-white placeholder:text-[#6b6b73] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#5b4dff]";
+
+const getText = (formData: FormData, key: string) =>
+  String(formData.get(key) ?? "").trim();
 
 export default function ApplyJobModal({
   jobId,
   jobTitle,
   company,
   disabled = false,
+  alreadyApplied = false,
 }: ApplyJobModalProps) {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+  const user = session?.user;
+
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [applied, setApplied] = useState(alreadyApplied);
 
   useEffect(() => {
     if (!open) return;
@@ -35,16 +45,57 @@ export default function ApplyJobModal({
     };
   }, [open]);
 
+  const handleOpen = () => {
+    if (applied) return;
+
+    if (!user) {
+      toast.error("You must be logged in to apply for this job");
+      router.push("/sign-in");
+      return;
+    }
+
+    const role = (user as { role?: string }).role;
+    if (role === "recruiter") {
+      toast.error("Recruiters cannot apply. Please sign up as a Seeker.");
+      return;
+    }
+
+    setOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    if (submitting || applied || !user) return;
 
-    setSubmitting(true);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const application: Omit<TApplication, "_id"> = {
+      jobId,
+      fullName: getText(formData, "fullName"),
+      email: getText(formData, "email"),
+      phone: getText(formData, "phone"),
+      resumeUrl: getText(formData, "resumeUrl"),
+      portfolioUrl: getText(formData, "portfolioUrl"),
+      expectedSalary: getText(formData, "expectedSalary"),
+      coverLetter: getText(formData, "coverLetter"),
+      seekerId: user.id,
+      seekerEmail: user.email,
+      applyDate: new Date().toISOString(),
+    };
+
     try {
-      // TODO: apply logic এখানে বসাও (data + jobId পাঠাও)
-      console.log("apply", { jobId, ...data });
-      // সফল হলে: setOpen(false);
+      setSubmitting(true);
+      await createApplication(application);
+
+      setApplied(true); // এরপর আর Apply চাপা যাবে না
+      setOpen(false);
+      toast.success("Applied successfully!");
+      router.refresh();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to submit application.";
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -52,14 +103,25 @@ export default function ApplyJobModal({
 
   return (
     <>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setOpen(true)}
-        className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Apply Now
-      </button>
+      {applied ? (
+        <button
+          type="button"
+          disabled
+          className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-6 py-2.5 text-sm font-semibold text-emerald-400"
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          Applied
+        </button>
+      ) : (
+        <button
+          type="button"
+          disabled={disabled || isPending}
+          onClick={handleOpen}
+          className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Apply Now
+        </button>
+      )}
 
       {open && (
         <div
@@ -97,7 +159,14 @@ export default function ApplyJobModal({
                 <label htmlFor="fullName" className="text-xs font-medium text-[#e4e4ea]">
                   Full name
                 </label>
-                <input id="fullName" name="fullName" required placeholder="Your full name" className={`${inputCls} mt-1.5`} />
+                <input
+                  id="fullName"
+                  name="fullName"
+                  required
+                  defaultValue={user?.name ?? ""}
+                  placeholder="Your full name"
+                  className={`${inputCls} mt-1.5`}
+                />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -105,13 +174,27 @@ export default function ApplyJobModal({
                   <label htmlFor="email" className="text-xs font-medium text-[#e4e4ea]">
                     Email
                   </label>
-                  <input id="email" name="email" type="email" required placeholder="you@example.com" className={`${inputCls} mt-1.5`} />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    defaultValue={user?.email ?? ""}
+                    placeholder="you@example.com"
+                    className={`${inputCls} mt-1.5`}
+                  />
                 </div>
                 <div>
                   <label htmlFor="phone" className="text-xs font-medium text-[#e4e4ea]">
                     Phone
                   </label>
-                  <input id="phone" name="phone" type="tel" placeholder="+880..." className={`${inputCls} mt-1.5`} />
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="+880..."
+                    className={`${inputCls} mt-1.5`}
+                  />
                 </div>
               </div>
 
@@ -119,21 +202,41 @@ export default function ApplyJobModal({
                 <label htmlFor="resumeUrl" className="text-xs font-medium text-[#e4e4ea]">
                   Resume link
                 </label>
-                <input id="resumeUrl" name="resumeUrl" type="url" required placeholder="https://drive.google.com/..." className={`${inputCls} mt-1.5`} />
+                <input
+                  id="resumeUrl"
+                  name="resumeUrl"
+                  type="url"
+                  required
+                  placeholder="https://drive.google.com/..."
+                  className={`${inputCls} mt-1.5`}
+                />
               </div>
 
               <div>
                 <label htmlFor="portfolioUrl" className="text-xs font-medium text-[#e4e4ea]">
                   Portfolio / LinkedIn (optional)
                 </label>
-                <input id="portfolioUrl" name="portfolioUrl" type="url" placeholder="https://..." className={`${inputCls} mt-1.5`} />
+                <input
+                  id="portfolioUrl"
+                  name="portfolioUrl"
+                  type="url"
+                  placeholder="https://..."
+                  className={`${inputCls} mt-1.5`}
+                />
               </div>
 
               <div>
                 <label htmlFor="expectedSalary" className="text-xs font-medium text-[#e4e4ea]">
                   Expected salary (optional)
                 </label>
-                <input id="expectedSalary" name="expectedSalary" type="number" min={0} placeholder="e.g. 1000" className={`${inputCls} mt-1.5`} />
+                <input
+                  id="expectedSalary"
+                  name="expectedSalary"
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 1000"
+                  className={`${inputCls} mt-1.5`}
+                />
               </div>
 
               <div>
@@ -164,7 +267,7 @@ export default function ApplyJobModal({
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-black hover:bg-gray-200 disabled:opacity-60"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Submit application
+                  {submitting ? "Submitting..." : "Submit application"}
                 </button>
               </div>
             </form>

@@ -1,6 +1,11 @@
 export type TApplication = {
   _id?: string;
   jobId?: string;
+  jobTitle?: string;
+  company?: string;
+  jobType?: string;
+  workMode?: string;
+  status?: ApplicationStatus;
   fullName: string;
   email: string;
   phone: string;
@@ -12,7 +17,6 @@ export type TApplication = {
   seekerId: string;
   seekerEmail: string;
 };
-
 export type ApplyJobModalProps = {
   jobId: string;
   jobTitle: string;
@@ -20,3 +24,12 @@ export type ApplyJobModalProps = {
   disabled?: boolean;
   alreadyApplied?: boolean; // সার্ভার থেকে জানা থাকলে true পাঠান
 };
+
+export type ApplicationStatus =
+  | "Applied"
+  | "Review"
+  | "Shortlisted"
+  | "Interview"
+  | "Rejected"
+  | "Offered";
+

@@ -9,8 +9,6 @@ import { authClient } from "@/lib/auth-client";
 import { createApplication } from "@/lib/actions/applications";
 import { ApplyJobModalProps, TApplication } from "@/types/applicationsType";
 
-
-
 const inputCls =
   "h-10 w-full rounded-lg border border-white/[0.07] bg-[#18181b] px-3 text-sm text-white placeholder:text-[#6b6b73] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#5b4dff]";
 
@@ -30,7 +28,10 @@ export default function ApplyJobModal({
 
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [applied, setApplied] = useState(alreadyApplied);
+  const [applied, setApplied] = useState(false);
+
+  // সার্ভার থেকে আসা মান অথবা এই সেশনে apply করা, যেকোনোটা true হলেই Applied
+  const isApplied = applied || alreadyApplied;
 
   useEffect(() => {
     if (!open) return;
@@ -46,7 +47,7 @@ export default function ApplyJobModal({
   }, [open]);
 
   const handleOpen = () => {
-    if (applied) return;
+    if (isApplied) return;
 
     if (!user) {
       toast.error("You must be logged in to apply for this job");
@@ -65,13 +66,12 @@ export default function ApplyJobModal({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (submitting || applied || !user) return;
+    if (submitting || isApplied || !user) return;
 
     const form = e.currentTarget;
     const formData = new FormData(form);
 
     const application: Omit<TApplication, "_id"> = {
-      jobId,
       fullName: getText(formData, "fullName"),
       email: getText(formData, "email"),
       phone: getText(formData, "phone"),
@@ -81,6 +81,9 @@ export default function ApplyJobModal({
       coverLetter: getText(formData, "coverLetter"),
       seekerId: user.id,
       seekerEmail: user.email,
+      jobId,
+      jobTitle,
+      company,
       applyDate: new Date().toISOString(),
     };
 
@@ -88,13 +91,15 @@ export default function ApplyJobModal({
       setSubmitting(true);
       await createApplication(application);
 
-      setApplied(true); // এরপর আর Apply চাপা যাবে না
+      setApplied(true);
       setOpen(false);
       toast.success("Applied successfully!");
       router.refresh();
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : "Failed to submit application.";
+        error instanceof Error
+          ? error.message
+          : "Failed to submit application.";
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -103,7 +108,7 @@ export default function ApplyJobModal({
 
   return (
     <>
-      {applied ? (
+      {isApplied ? (
         <button
           type="button"
           disabled
@@ -156,7 +161,10 @@ export default function ApplyJobModal({
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label htmlFor="fullName" className="text-xs font-medium text-[#e4e4ea]">
+                <label
+                  htmlFor="fullName"
+                  className="text-xs font-medium text-[#e4e4ea]"
+                >
                   Full name
                 </label>
                 <input
@@ -171,7 +179,10 @@ export default function ApplyJobModal({
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="email" className="text-xs font-medium text-[#e4e4ea]">
+                  <label
+                    htmlFor="email"
+                    className="text-xs font-medium text-[#e4e4ea]"
+                  >
                     Email
                   </label>
                   <input
@@ -185,7 +196,10 @@ export default function ApplyJobModal({
                   />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="text-xs font-medium text-[#e4e4ea]">
+                  <label
+                    htmlFor="phone"
+                    className="text-xs font-medium text-[#e4e4ea]"
+                  >
                     Phone
                   </label>
                   <input
@@ -199,7 +213,10 @@ export default function ApplyJobModal({
               </div>
 
               <div>
-                <label htmlFor="resumeUrl" className="text-xs font-medium text-[#e4e4ea]">
+                <label
+                  htmlFor="resumeUrl"
+                  className="text-xs font-medium text-[#e4e4ea]"
+                >
                   Resume link
                 </label>
                 <input
@@ -213,7 +230,10 @@ export default function ApplyJobModal({
               </div>
 
               <div>
-                <label htmlFor="portfolioUrl" className="text-xs font-medium text-[#e4e4ea]">
+                <label
+                  htmlFor="portfolioUrl"
+                  className="text-xs font-medium text-[#e4e4ea]"
+                >
                   Portfolio / LinkedIn (optional)
                 </label>
                 <input
@@ -226,7 +246,10 @@ export default function ApplyJobModal({
               </div>
 
               <div>
-                <label htmlFor="expectedSalary" className="text-xs font-medium text-[#e4e4ea]">
+                <label
+                  htmlFor="expectedSalary"
+                  className="text-xs font-medium text-[#e4e4ea]"
+                >
                   Expected salary (optional)
                 </label>
                 <input
@@ -240,7 +263,10 @@ export default function ApplyJobModal({
               </div>
 
               <div>
-                <label htmlFor="coverLetter" className="text-xs font-medium text-[#e4e4ea]">
+                <label
+                  htmlFor="coverLetter"
+                  className="text-xs font-medium text-[#e4e4ea]"
+                >
                   Cover letter
                 </label>
                 <textarea

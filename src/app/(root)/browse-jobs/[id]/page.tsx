@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -15,9 +16,12 @@ import {
   User,
 } from "lucide-react";
 
+import { auth } from "@/lib/auth";
 import { getJobsById } from "@/lib/api/job";
+import { getApplications } from "@/lib/api/applications";
 import { SaveJobButton } from "@/components/browse-jobs/BrowseControls";
 import ApplyJobModal from "@/components/browse-jobs/ApplyJobModal";
+import type { TApplication } from "@/types/applicationTypes";
 
 const frequencyShort: Record<string, string> = {
   "per hour": "hr",
@@ -138,6 +142,17 @@ const JobsDetailsPage = async ({
 
   if (!job) notFound();
 
+  // ইউজার আগে apply করেছে কি না, সার্ভারে চেক
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  let alreadyApplied = false;
+  if (session) {
+    const applications = (await getApplications()) as TApplication[];
+    alreadyApplied = applications.some(
+      (a) => a.jobId === id && a.seekerId === session.user.id,
+    );
+  }
+
   const unit = frequencyShort[job.frequency];
   const salary =
     job.minSalary || job.maxSalary
@@ -207,6 +222,7 @@ const JobsDetailsPage = async ({
                 jobId={job._id ?? ""}
                 jobTitle={job.title}
                 company={job.company}
+                alreadyApplied={alreadyApplied}
               />
             )}
           </div>

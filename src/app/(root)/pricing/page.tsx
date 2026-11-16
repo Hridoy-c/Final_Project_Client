@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 
+
 type Billing = "monthly" | "yearly";
 type PlanId = "starter" | "pro" | "enterprise";
 
@@ -161,11 +162,9 @@ const PricingPage = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (submitting) return;
-
-    setSubmitting(true);
-    // এখানে চাইলে payment / API কল বসাতে পারেন
-    router.push(`/sign-up?plan=${selectedPlan}&billing=${billing}`);
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());  
+    console.log(data);
   };
 
   return (
